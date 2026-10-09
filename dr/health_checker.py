@@ -29,13 +29,62 @@ URL = {"a": "http://127.0.0.1:8001", "b": "http://127.0.0.1:8002"}
 
 
 def probe(region: str, timeout: float) -> tuple[bool, str]:
-    """TODO: trả về (ready, reason). Timeout PHẢI có — netblock làm request treo mãi."""
-    raise NotImplementedError
+    """Trả về (ready, reason). Timeout PHẢI có — netblock làm request treo mãi."""
+    try:
+        r = httpx.get(f"{URL[region]}/readyz", timeout=timeout)
+    except httpx.TimeoutException:
+        return False, f"timeout_{timeout}s"
+    except Exception as e:
+        return False, type(e).__name__
+    if r.status_code == 200:
+        return True, "ready"
+    try:
+        reasons = r.json().get("reasons") or []
+    except Exception:
+        reasons = []
+    return False, f"http_{r.status_code}:" + ",".join(reasons)
 
 
 def run(interval: float, timeout: float, threshold: int, duration: float, out: pathlib.Path):
-    """TODO: vòng lặp poll + phát hiện transition + ghi JSONL."""
-    raise NotImplementedError
+    """Poll cả 2 region theo nhịp cố định, chỉ ghi JSONL khi trạng thái đổi.
+
+    Trạng thái ban đầu coi là HEALTHY và không ghi log -> dòng đầu tiên trong file
+    luôn là một transition thật. UNHEALTHY cần `threshold` lần fail LIÊN TIẾP;
+    1 lần probe OK là đủ để quay về HEALTHY (và reset bộ đếm).
+    """
+    out.parent.mkdir(parents=True, exist_ok=True)
+    state = {r: "HEALTHY" for r in URL}
+    fails = {r: 0 for r in URL}
+    start = time.time()
+    end = start + duration
+    tick = 0
+    with out.open("a") as f:
+        while time.time() < end:
+            for region in URL:
+                ok, reason = probe(region, timeout)
+                fails[region] = 0 if ok else fails[region] + 1
+                if ok and state[region] == "UNHEALTHY":
+                    new = "HEALTHY"
+                elif not ok and state[region] == "HEALTHY" and fails[region] >= threshold:
+                    new = "UNHEALTHY"
+                else:
+                    continue
+                now = time.time()
+                rec = {"ts": now,
+                       "iso": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now)),
+                       "event": "state_change", "region": region,
+                       "from": state[region], "to": new, "reason": reason,
+                       "consecutive_fails": fails[region],
+                       "interval_s": interval, "threshold": threshold,
+                       "detect_floor_s": round(interval * threshold, 2)}
+                state[region] = new
+                f.write(json.dumps(rec) + "\n")
+                f.flush()
+                print("HEALTH", json.dumps(rec), flush=True)
+            # Nhịp cố định theo đồng hồ (start + k*interval), không cộng dồn thời gian
+            # probe bị treo -> interval_s ghi trong log đúng là interval thật.
+            tick += 1
+            time.sleep(max(0.0, min(start + tick * interval, end) - time.time()))
 
 
 if __name__ == "__main__":
