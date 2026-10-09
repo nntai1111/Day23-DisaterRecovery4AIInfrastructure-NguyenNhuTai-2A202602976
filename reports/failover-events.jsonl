@@ -1,0 +1,13 @@
+{"ts": 1791559571.2810667, "iso": "2026-10-09T15:26:11", "step": "1_verify_target", "target": "b", "state": {"region": "b", "pool_state": "warm", "weights": false, "count": 0, "latest_doc_ts": null, "ts": 1791559571.2797704}}
+{"ts": 1791559571.4181426, "iso": "2026-10-09T15:26:11", "step": "2_restore_snapshot", "ok": true, "snapshot_at": 1791559566.6709352, "embed_model_version": "embed-model=vi-e5-base@v3", "rpo_seconds": 4.0, "docs_lost": 2, "primary_latest_doc_ts": 1791559570.6482034, "restored_latest_doc_ts": 1791559566.6477864}
+{"ts": 1791559571.4244819, "iso": "2026-10-09T15:26:11", "step": "3_scale_pool", "pool_state": "full"}
+{"ts": 1791559577.7906222, "iso": "2026-10-09T15:26:17", "step": "4_wait_ready", "ok": true, "waited_s": 6.36}
+{"ts": 1791559577.7965696, "iso": "2026-10-09T15:26:17", "step": "5_dns_cutover", "active_region": "b"}
+{"ts": 1791559818.218444, "iso": "2026-10-09T15:30:18", "step": "1_verify_target", "target": "b", "state": {"region": "b", "pool_state": "warm"}}
+{"ts": 1791559818.2519827, "iso": "2026-10-09T15:30:18", "step": "2_restore_snapshot", "ok": true, "snapshot_at": 1791559818.2204385, "embed_model_version": "test", "rpo_seconds": 118.01, "docs_lost": 59, "primary_latest_doc_ts": 1791559684.6571653, "restored_latest_doc_ts": 1791559566.6477864}
+{"ts": 1791559818.259192, "iso": "2026-10-09T15:30:18", "step": "3_scale_pool", "pool_state": "full"}
+{"ts": 1791559819.2634666, "iso": "2026-10-09T15:30:19", "step": "4_wait_ready", "ok": false, "waited_s": 1.0, "last_reason": "ConnectError", "note": "timeout -> ABORT, khong cutover"}
+{"ts": 1791559830.615288, "iso": "2026-10-09T15:30:30", "step": "1_verify_target", "target": "b", "state": {"region": "b", "pool_state": "warm"}}
+{"ts": 1791559830.647012, "iso": "2026-10-09T15:30:30", "step": "2_restore_snapshot", "ok": true, "snapshot_at": 1791559830.6171737, "embed_model_version": "test", "rpo_seconds": 118.01, "docs_lost": 59, "primary_latest_doc_ts": 1791559684.6571653, "restored_latest_doc_ts": 1791559566.6477864}
+{"ts": 1791559830.6540697, "iso": "2026-10-09T15:30:30", "step": "3_scale_pool", "pool_state": "full"}
+{"ts": 1791559831.6576376, "iso": "2026-10-09T15:30:31", "step": "4_wait_ready", "ok": false, "waited_s": 1.0, "last_reason": "ConnectError", "note": "timeout -> ABORT, khong cutover"}
